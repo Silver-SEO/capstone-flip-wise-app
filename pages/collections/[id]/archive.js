@@ -1,6 +1,7 @@
 import ArchiveList from "@/components/ArchiveList";
 import styled from "styled-components";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const Container = styled.div`
   display: flex;
@@ -47,6 +48,8 @@ export default function Archive({
       )
     : flashcards;
 
+  const flashcardLink = id ? `/collections/${id}/flashcards` : "/";
+
   return (
     <>
       <Container>
@@ -55,6 +58,7 @@ export default function Archive({
       <StyledCollectionTitle>
         {currentCollection ? currentCollection.title : "All Cards"}
       </StyledCollectionTitle>
+      <Link href={flashcardLink}>back to flashcards</Link>
       <ArchiveList
         flashcards={filteredFlashcards}
         collections={collections}
