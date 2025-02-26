@@ -1,7 +1,7 @@
-import FlashcardList from "@/components/FlashcardList";
 import styled from "styled-components";
-import { useState } from "react";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import FlashcardList from "@/components/FlashcardList";
 import Select from "react-select";
 
 const Container = styled.div`
@@ -39,15 +39,10 @@ const StyledButton = styled.button`
   cursor: pointer;
 `;
 
-export default function Archive({
-  flashcards,
-  collections,
-  handleToggleCorrect,
-  handleDeleteFlashcard,
-  handleUpdateFlashcard,
-}) {
-  const [selectedCollections, setSelectedCollections] = useState([]);
+export default function SelectedArchives({ collections, flashcards }) {
   const router = useRouter();
+  const [selectedCollections, setSelectedCollections] = useState([]);
+  const [filteredFlashcards, setFilteredFlashcards] = useState([]);
 
   const options = collections.map((collection) => ({
     value: collection._id,
@@ -69,13 +64,26 @@ export default function Archive({
     }
   };
 
-  const archivedCards = flashcards.filter((card) => card.isCorrect);
+  useEffect(() => {
+    if (router.query.ids) {
+      const collectionIds = router.query.ids.split(",");
+
+      const matchedCollections = collections.filter((c) =>
+        collectionIds.includes(c._id)
+      );
+      setSelectedCollections(matchedCollections);
+
+      const matchedFlashcards = flashcards.filter(
+        (card) => collectionIds.includes(card.collectionId) && card.isCorrect
+      );
+      setFilteredFlashcards(matchedFlashcards);
+    }
+  }, [router.query.ids, collections, flashcards]);
 
   return (
     <>
       <Container>
-        <StyledPageTitle>Archive</StyledPageTitle>
-
+        <StyledPageTitle>Ausgewählte Archive</StyledPageTitle>
         <Select
           isMulti
           name="collections"
@@ -106,14 +114,23 @@ export default function Archive({
         </StyledButton>
       </Container>
 
-      <StyledCollectionTitle>All Cards</StyledCollectionTitle>
-      <FlashcardList
-        flashcards={archivedCards}
-        collections={collections}
-        handleToggleCorrect={handleToggleCorrect}
-        handleDeleteFlashcard={handleDeleteFlashcard}
-        handleUpdateFlashcard={handleUpdateFlashcard}
-      />
+      {selectedCollections.length === 0 ? (
+        <p>No flashcards found.</p>
+      ) : (
+        selectedCollections.map((selectedCollection) => (
+          <div key={selectedCollection._id} style={{ marginBottom: "20px" }}>
+            <StyledCollectionTitle>
+              {selectedCollection.title}
+            </StyledCollectionTitle>
+            <FlashcardList
+              flashcards={filteredFlashcards.filter(
+                (card) => card.collectionId === selectedCollection._id
+              )}
+              collections={collections}
+            />
+          </div>
+        ))
+      )}
     </>
   );
 }
