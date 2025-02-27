@@ -6,6 +6,9 @@ import useSWR from "swr";
 import { ThemeProvider } from "styled-components";
 import styled from "styled-components";
 import ThemeSwitch from "@/components/ThemeSwitch";
+import { SessionProvider } from "next-auth/react";
+import Login from "@/components/Login";
+import handleCheckUserExistence from "@/utils/CheckUserExistence";
 
 const StyledTitle = styled.h1`
   display: flex;
@@ -13,7 +16,16 @@ const StyledTitle = styled.h1`
   align-items: center;
   font-size: 3.5rem;
   font-weight: 700;
+  margin-top: 0;
   margin-bottom: 0;
+`;
+
+const StyledLogIn = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 4px 4px 0 0;
+  gap: 4px;
 `;
 
 const fetcher = (url) => fetch(url).then((response) => response.json());
@@ -22,18 +34,17 @@ export default function App({ Component, pageProps }) {
   const [themeMode, setThemeMode] = useState("dark");
 
   const {
-    data: flashcards,
-    isLoading: flashcardsLoading,
-    error: flashcardError,
-    mutate: flashcardsMutate,
-  } = useSWR("/api/flashcards", fetcher);
-
-  const {
     data: collections,
     isLoading: collectionsLoading,
     error: collectionsError,
     mutate: collectionsMutate,
   } = useSWR("/api/collections", fetcher);
+  const {
+    data: flashcards,
+    isLoading: flashcardsLoading,
+    error: flashcardError,
+    mutate: flashcardsMutate,
+  } = useSWR("/api/flashcards", fetcher);
 
   if (flashcardsLoading || collectionsLoading) {
     return <h1>Loading...</h1>;
@@ -96,7 +107,7 @@ export default function App({ Component, pageProps }) {
     }
   }
 
-  async function handleUpdateFlashcard(_id, data) {
+  async function handleUpdateFlashcard(data, _id) {
     const response = await fetch(`/api/flashcards/${_id}`, {
       method: "PUT",
       headers: {
@@ -146,10 +157,6 @@ export default function App({ Component, pageProps }) {
     }
   }
 
-  function handleToggleThemeMode(selectedThemeMode) {
-    setThemeMode(selectedThemeMode);
-  }
-
   async function handleDeleteCollection(_id) {
     const response = await fetch(`/api/collections/${_id}`, {
       method: "DELETE",
@@ -161,37 +168,68 @@ export default function App({ Component, pageProps }) {
     collectionsMutate();
   }
 
+  function handleToggleThemeMode(selectedThemeMode) {
+    setThemeMode(selectedThemeMode);
+  }
+
+  async function handleCreateUser(data) {
+    try {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        console.error("Failed to create user");
+        return;
+      }
+      return response.json();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
-    <ThemeProvider theme={theme[themeMode]}>
-      <GlobalStyle />
-      <SWRConfig value={{ fetcher }}>
-        <header>
-          <StyledTitle>Flipwise App</StyledTitle>
-          <ThemeSwitch
-            theme={themeMode}
-            onHandleToggleThemeMode={handleToggleThemeMode}
-          />
-        </header>
-        <main>
-          <Component
-            {...pageProps}
-            flashcards={flashcards}
-            collections={collections}
-            handleToggleCorrect={handleToggleCorrect}
-            handleDeleteFlashcard={handleDeleteFlashcard}
-            handleUpdateFlashcard={handleUpdateFlashcard}
-            handleDeleteCollection={handleDeleteCollection}
-            handleUpdateCollection={handleUpdateCollection}
-          />
-        </main>
-        <footer>
-          <Navbar
-            handleCreateFlashcard={handleCreateFlashcard}
-            collections={collections}
-            handleCreateCollection={handleCreateCollection}
-          />
-        </footer>
-      </SWRConfig>
-    </ThemeProvider>
+    <SessionProvider session={pageProps.session}>
+      <ThemeProvider theme={theme[themeMode]}>
+        <GlobalStyle />
+        <SWRConfig value={{ fetcher }}>
+          <header>
+            <StyledLogIn>
+              <Login
+                handleCreateUser={handleCreateUser}
+                handleCheckUserExistence={handleCheckUserExistence}
+              />
+            </StyledLogIn>
+            <StyledTitle>Flipwise App</StyledTitle>
+            <ThemeSwitch
+              theme={themeMode}
+              onHandleToggleThemeMode={handleToggleThemeMode}
+            />
+          </header>
+          <main>
+            <Component
+              {...pageProps}
+              flashcards={flashcards}
+              collections={collections}
+              handleToggleCorrect={handleToggleCorrect}
+              handleDeleteFlashcard={handleDeleteFlashcard}
+              handleUpdateFlashcard={handleUpdateFlashcard}
+              handleDeleteCollection={handleDeleteCollection}
+              handleUpdateCollection={handleUpdateCollection}
+            />
+          </main>
+          <footer>
+            <Navbar
+              handleCreateFlashcard={handleCreateFlashcard}
+              collections={collections}
+              handleCreateCollection={handleCreateCollection}
+            />
+          </footer>
+        </SWRConfig>
+      </ThemeProvider>
+    </SessionProvider>
   );
 }
