@@ -1,5 +1,6 @@
 import CollectionList from "@/components/CollectionList";
 import styled from "styled-components";
+import ImageUpload from "@/components/ImageUpload";
 
 const Container = styled.div`
   display: flex;
@@ -27,6 +28,7 @@ export default function Homepage({
       <Container>
         <StyledPageTitle>List of collections</StyledPageTitle>
       </Container>
+      <ImageUpload></ImageUpload>
       <CollectionList
         flashcards={flashcards}
         collections={collections}
