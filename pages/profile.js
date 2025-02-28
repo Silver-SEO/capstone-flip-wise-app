@@ -1,6 +1,11 @@
 import styled from "styled-components";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import { useSession, signOut } from "next-auth/react";
+import ImageUpload from "@/components/ImageUpload";
+import Image from "next/image";
+import Modal from "@/components/Modal";
+import { useState } from "react";
+import useSWR from "swr";
 
 const Container = styled.div`
   display: flex;
@@ -50,6 +55,14 @@ const StyledButton = styled.button`
   }
 `;
 
+const StyledImage = styled(Image)`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+`;
+
+const fetcher = (url) => fetch(url).then((response) => response.json());
+
 export default function Profile({
   flashcards,
   collections,
@@ -57,9 +70,24 @@ export default function Profile({
   onHandleToggleThemeMode,
 }) {
   const { data: session } = useSession();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const {
+    data: images,
+    isLoading: imagesLoading,
+    error: imagesError,
+    mutate: imagesMutate,
+  } = useSWR("/api/images", fetcher);
+
+  if (imagesError) return <div>failed to load</div>;
+  if (imagesLoading) return <div>loading...</div>;
+
+  console.log();
+
   let userId;
   let userName;
   let userImage;
+
   if (session) {
     userId = session.user.id;
     userName = session.user.name;
@@ -69,16 +97,30 @@ export default function Profile({
     userName = "Dominik Muster";
     userImage = "/asset/user.png";
   }
+
   const myCollections = collections.filter(
     (collection) => collection.owner === userId
   ).length;
-
   const myFlashcards = flashcards.filter(
     (flashcard) => flashcard.owner === userId
   ).length;
   const myCorrectFlashcards = flashcards.filter(
     (flashcard) => flashcard.owner === userId && flashcard.isCorrect
   ).length;
+
+  function placeholder() {
+    setIsModalOpen(true);
+  }
+
+  {
+    /* <ImageUpload></ImageUpload>
+            <StyledImage
+        alt={`image of ${image.title}`}
+        src={image.url}
+        fill
+        style={{ objectFit: "contain" }}
+      ></StyledImage> */
+  }
 
   return (
     <Container>
@@ -97,6 +139,26 @@ export default function Profile({
           <img src={userImage} alt="login-image" width={100} height={100} />
         </IconLogOut>
       )}
+      <ButtonBar>
+        <StyledButton onClick={() => placeholder()} disabled={!session}>
+          image delete
+        </StyledButton>
+        <StyledButton onClick={() => placeholder()} disabled={!session}>
+          image upload
+        </StyledButton>
+      </ButtonBar>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Upload Image"
+      >
+        <ImageUpload
+          onClose={() => setIsModalOpen(false)}
+          imagesMutate={imagesMutate}
+          userId={userId}
+        ></ImageUpload>
+      </Modal>
+
       <article>
         <h4>statistics</h4>
         <p>Name: {userName}</p>

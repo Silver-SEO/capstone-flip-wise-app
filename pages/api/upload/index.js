@@ -34,7 +34,11 @@ export default async function handler(request, response) {
 
   // now we have the information about the image, we can send it to Cloudinary
 
-  const result = await cloudinary.v2.uploader.upload(filepath, {
+  const {
+    height,
+    width,
+    secure_url: url,
+  } = await cloudinary.v2.uploader.upload(filepath, {
     public_id: newFilename,
     folder: "capstone-flip-wise-app",
   });
@@ -45,5 +49,9 @@ export default async function handler(request, response) {
     - 'folder' lets us designate a specific folder within Cloudinary where the file should be stored.
     */
 
-  response.status(200).json(result);
+  response.status(201).json({
+    height,
+    width,
+    url,
+  });
 }

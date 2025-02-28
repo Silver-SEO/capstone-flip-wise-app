@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  userId: { type: String, required: true },
+  userId: { type: String },
   image: {
-    width: { type: String },
     height: { type: String },
+    width: { type: String },
     url: { type: String },
   },
 });

@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import Button from "./Button";
+import { useState } from "react";
+import Image from "next/image";
 
 const StyledForm = styled.form`
   position: relative;
@@ -34,7 +36,17 @@ const ButtonContainer = styled.div`
   gap: 8px;
 `;
 
-export default function ImageUpload() {
+const StyledImageWrapper = styled.div`
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+`;
+
+export default function ImageUpload({ onClose, imagesMutate, userId }) {
+  const [uploadMode, setUploadMode] = useState("upload");
+  const [image, setImage] = useState(null);
+
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -43,15 +55,72 @@ export default function ImageUpload() {
       method: "POST",
       body: formData,
     });
+    if (!response.ok) {
+      console.error("Upload not available");
+      return;
+    }
+    setUploadMode("confirm");
+    try {
+      const { height, width, url } = await response.json();
+
+      const newImage = { userId: userId, image: { height, width, url } };
+
+      await fetch("/api/images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newImage),
+      });
+
+      imagesMutate();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function handleSubmitConfirm() {
+    onClose();
+  }
+
+  function handleChange(event) {
+    setImage(event.target.files[0]);
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit}>
-      <Label htmlFor="imageUpload"></Label>
-      <Input id="imageUpload" type="file" name="image" required />
-      <ButtonContainer>
-        <Button type="submit" buttonLabel="image upload" />
-      </ButtonContainer>
-    </StyledForm>
+    <>
+      {uploadMode === "upload" && (
+        <StyledForm onSubmit={handleSubmit}>
+          <Label htmlFor="imageUpload"></Label>
+          <Input
+            id="imageUpload"
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+            required
+          />
+          <ButtonContainer>
+            <Button type="submit" buttonLabel="image upload" />
+          </ButtonContainer>
+        </StyledForm>
+      )}
+      {uploadMode === "confirm" && (
+        <>
+          <StyledImageWrapper>
+            <Image
+              src={URL.createObjectURL(image)}
+              alt="Preview of the image to upload"
+              sizes="300px"
+              fill
+              style={{
+                objectFit: "contain",
+              }}
+            />
+          </StyledImageWrapper>
+          <Button onClick={handleSubmitConfirm} buttonLabel="confirm image" />
+        </>
+      )}
+    </>
   );
 }

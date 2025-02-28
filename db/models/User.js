@@ -5,8 +5,8 @@ const userSchema = new Schema({
   userId: { type: String, required: true },
   themeMode: { type: String, default: "dark", required: true },
   image: {
-    width: { type: String },
     height: { type: String },
+    width: { type: String },
     url: { type: String },
   },
 });
