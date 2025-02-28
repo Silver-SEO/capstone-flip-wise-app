@@ -16,7 +16,7 @@ export default async function handler(request, response) {
         const image = await Image.create({ ...request.body });
         return response
           .status(201)
-          .json({ status: "User created", data: image });
+          .json({ status: "Image created", data: image });
       }
       default:
         return response.status(405).json({ status: "Method not allowed" });

@@ -30,21 +30,56 @@ const StyledButton = styled.button`
   cursor: pointer;
 `;
 
-export default function Login({ handleCreateUser, CheckUserExistence }) {
+async function handleCreateUser(data) {
+  try {
+    const response = await fetch("/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      console.error("Failed to create user");
+      return;
+    }
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function handlePickupUserThemeMode(data) {
+  try {
+    const response = await fetch("/api/users");
+    if (!response.ok) {
+      console.error("User not available");
+      return;
+    }
+    const users = await response.json();
+    const userData = users.find((user) => user.userId === data.userId);
+    const userThemeMode = userData.themeMode;
+    return userThemeMode;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
     async function controlUserExistence() {
-      if (session) {
-        const userId = session.user.id;
-        const userIsAvailable = (await CheckUserExistence({ userId }))
-          ? true
-          : false;
-        if (!userIsAvailable) {
-          const userId = session.user.id;
-          handleCreateUser({ userId });
-        }
+      if (!session) {
+        return;
       }
+      const userId = session.user.id;
+      const userIsAvailable = await CheckUserExistence({ userId });
+      if (!userIsAvailable) {
+        handleCreateUser({ userId });
+      }
+      const currentUserThemeMode = await handlePickupUserThemeMode({ userId });
+      handleToggleThemeMode(currentUserThemeMode);
     }
     controlUserExistence();
   }, [session]);
@@ -85,7 +120,7 @@ export default function Login({ handleCreateUser, CheckUserExistence }) {
             )}
           </IconLogIn>
         </Link>
-        <StyledButton onClick={() => signOut()}>Sign out</StyledButton>
+        <StyledButton onClick={() => handleSignOut()}>Sign out</StyledButton>
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

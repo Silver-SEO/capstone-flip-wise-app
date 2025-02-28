@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Button from "./Button";
 import { useState } from "react";
 import Image from "next/image";
+import CheckUserExistence from "@/utils/CheckUserExistence";
 
 const StyledForm = styled.form`
   position: relative;
@@ -60,22 +61,28 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
       return;
     }
     setUploadMode("confirm");
+    //Update user image
+    const userData = await CheckUserExistence({ userId });
+    const user_Id = userData._id;
     try {
       const { height, width, url } = await response.json();
-
-      const newImage = { userId: userId, image: { height, width, url } };
-
-      await fetch("/api/images", {
-        method: "POST",
+      const newImage = { image: { height, width, url } };
+      const response = await fetch(`/api/users/${user_Id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newImage),
       });
-
+      if (!response.ok) {
+        console.error("Failed to save user data");
+        return null;
+      }
       imagesMutate();
+      return response.json();
     } catch (error) {
       console.error(error);
+      return null;
     }
   }
 
@@ -111,8 +118,8 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
             <Image
               src={URL.createObjectURL(image)}
               alt="Preview of the image to upload"
-              sizes="300px"
-              fill
+              width={300}
+              height={300}
               style={{
                 objectFit: "contain",
               }}
