@@ -2,10 +2,12 @@ import styled from "styled-components";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import { useSession, signOut } from "next-auth/react";
 import ImageUpload from "@/components/ImageUpload";
+import ImageDelete from "@/components/ImageDelete";
 import Image from "next/image";
 import Modal from "@/components/Modal";
 import { useState } from "react";
 import useSWR from "swr";
+import CheckUserExistence from "@/utils/CheckUserExistence";
 
 const Container = styled.div`
   display: flex;
@@ -55,12 +57,6 @@ const StyledButton = styled.button`
   }
 `;
 
-const StyledImage = styled(Image)`
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-`;
-
 const fetcher = (url) => fetch(url).then((response) => response.json());
 
 export default function Profile({
@@ -71,6 +67,8 @@ export default function Profile({
 }) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userImage, setUserImage] = useState("/asset/user.png");
+  const [profileModalMode, setprofileModalMode] = useState("upload");
 
   const {
     data: images,
@@ -82,20 +80,27 @@ export default function Profile({
   if (imagesError) return <div>failed to load</div>;
   if (imagesLoading) return <div>loading...</div>;
 
-  console.log();
-
   let userId;
   let userName;
-  let userImage;
+
+  async function CheckUserImage(userId) {
+    const userIsAvailable = await CheckUserExistence({ userId });
+    if (userIsAvailable.image) {
+      setUserImage(userIsAvailable.image.url);
+      return;
+    } else {
+      setUserImage(session.user.image);
+      return;
+    }
+  }
 
   if (session) {
     userId = session.user.id;
     userName = session.user.name;
-    userImage = session.user.image;
+    CheckUserImage(userId);
   } else {
     userId = 189611570;
     userName = "Dominik Muster";
-    userImage = "/asset/user.png";
   }
 
   const myCollections = collections.filter(
@@ -108,26 +113,12 @@ export default function Profile({
     (flashcard) => flashcard.owner === userId && flashcard.isCorrect
   ).length;
 
-  function placeholder() {
-    setIsModalOpen(true);
-  }
-
-  {
-    /* <ImageUpload></ImageUpload>
-            <StyledImage
-        alt={`image of ${image.title}`}
-        src={image.url}
-        fill
-        style={{ objectFit: "contain" }}
-      ></StyledImage> */
-  }
-
   return (
     <Container>
       <StyledPageTitle>my profile</StyledPageTitle>
-      {session && session.user.image && (
+      {session && (
         <img
-          src={session.user.image}
+          src={userImage}
           alt="profile-image"
           width={100}
           height={100}
@@ -140,25 +131,46 @@ export default function Profile({
         </IconLogOut>
       )}
       <ButtonBar>
-        <StyledButton onClick={() => placeholder()} disabled={!session}>
+        <StyledButton
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("delete");
+          }}
+          disabled={!session || userImage === session.user.image}
+        >
           image delete
         </StyledButton>
-        <StyledButton onClick={() => placeholder()} disabled={!session}>
+        <StyledButton
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("upload");
+          }}
+          disabled={!session}
+        >
           image upload
         </StyledButton>
       </ButtonBar>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Upload Image"
+        title={profileModalMode === "upload" ? "Upload Image" : "Delete Image"}
       >
-        <ImageUpload
-          onClose={() => setIsModalOpen(false)}
-          imagesMutate={imagesMutate}
-          userId={userId}
-        ></ImageUpload>
+        {profileModalMode === "upload" && (
+          <ImageUpload
+            onClose={() => setIsModalOpen(false)}
+            imagesMutate={imagesMutate}
+            userId={userId}
+          ></ImageUpload>
+        )}
+        {profileModalMode === "delete" && (
+          <ImageDelete
+            onClose={() => setIsModalOpen(false)}
+            imagesMutate={imagesMutate}
+            userId={userId}
+            userImage={userImage}
+          ></ImageDelete>
+        )}
       </Modal>
-
       <article>
         <h4>statistics</h4>
         <p>Name: {userName}</p>

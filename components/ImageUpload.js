@@ -47,25 +47,28 @@ const StyledImageWrapper = styled.div`
 export default function ImageUpload({ onClose, imagesMutate, userId }) {
   const [uploadMode, setUploadMode] = useState("upload");
   const [image, setImage] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
+    //upload user image to cloudinary
+    setIsUploading(true);
     const data = Object.fromEntries(formData);
-    const response = await fetch("/api/upload", {
+    const uploadResponse = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
-    if (!response.ok) {
+    if (!uploadResponse.ok) {
       console.error("Upload not available");
       return;
     }
     setUploadMode("confirm");
-    //Update user image
+    //Update user image in database
     const userData = await CheckUserExistence({ userId });
     const user_Id = userData._id;
     try {
-      const { height, width, url } = await response.json();
+      const { height, width, url } = await uploadResponse.json();
       const newImage = { image: { height, width, url } };
       const response = await fetch(`/api/users/${user_Id}`, {
         method: "PUT",
@@ -79,6 +82,7 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
         return null;
       }
       imagesMutate();
+      setIsUploading(false);
       return response.json();
     } catch (error) {
       console.error(error);
@@ -108,7 +112,11 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
             required
           />
           <ButtonContainer>
-            <Button type="submit" buttonLabel="image upload" />
+            <Button
+              type="submit"
+              buttonLabel={isUploading ? "Uploading..." : "image upload"}
+              disabled={isUploading}
+            />
           </ButtonContainer>
         </StyledForm>
       )}
@@ -125,7 +133,7 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
               }}
             />
           </StyledImageWrapper>
-          <Button onClick={handleSubmitConfirm} buttonLabel="confirm image" />
+          <Button onClick={handleSubmitConfirm} buttonLabel="image confirm" />
         </>
       )}
     </>
