@@ -26,10 +26,12 @@ export default async function handler(request, response) {
 
   // we have access to a .parse() method that allows us to access the fields
   // and more importantly the files
-  const [fields, files] = await form.parse(request);
+  const [files] = await form.parse(request);
+  console.log("files_", files);
 
   //  refers to the first file in the array of files uploaded through the form input with the "name "attribute set to "image".
   const file = files.image[0];
+  console.log("file_", file);
   const { newFilename, filepath } = file;
 
   // now we have the information about the image, we can send it to Cloudinary

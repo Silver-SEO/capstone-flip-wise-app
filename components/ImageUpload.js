@@ -49,7 +49,7 @@ export default function ImageUpload() {
   return (
     <StyledForm onSubmit={handleSubmit}>
       <Label htmlFor="imageUpload"></Label>
-      <Input id="imageUpload" type="file" name="imageUpload" required />
+      <Input id="imageUpload" type="file" name="image" required />
       <ButtonContainer>
         <Button type="submit" buttonLabel="image upload" />
       </ButtonContainer>
