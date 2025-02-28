@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
   userId: { type: String, required: true },
-  themeMode: { type: String, default: "dark", required: true },
   image: {
     width: { type: String },
     height: { type: String },
@@ -11,6 +10,6 @@ const userSchema = new Schema({
   },
 });
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+const Image = mongoose.models.User || mongoose.model("Image", userSchema);
 
-export default User;
+export default Image;
