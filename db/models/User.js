@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  userIdProvider: { type: String, required: true },
-
+  userId: { type: String, required: true },
+  themeMode: { type: String, default: "dark", required: true },
   title: { type: String },
   image: {
     width: { type: String, required: true },
