@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { SessionProvider } from "next-auth/react";
 import Login from "@/components/Login";
 import CheckUserExistence from "@/utils/CheckUserExistence";
-import ThemeSwitch from "@/components/ThemeSwitch";
 import { useRouter } from "next/router";
 
 const StyledTitle = styled.h1`
@@ -187,12 +186,7 @@ export default function App({ Component, pageProps }) {
               />
             </StyledLogIn>
             <StyledTitle>Flipwise App</StyledTitle>
-            {!router.pathname.startsWith("/quiz") && (
-              <ThemeSwitch
-                theme={themeMode}
-                onHandleToggleThemeMode={handleToggleThemeMode}
-              />
-            )}
+            {!router.pathname.startsWith("/quiz")}
           </header>
           <main>
             <Component
