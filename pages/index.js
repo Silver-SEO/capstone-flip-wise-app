@@ -1,20 +1,30 @@
-import CollectionList from "@/components/CollectionList";
 import styled from "styled-components";
 import ImageUpload from "@/components/ImageUpload";
 import Image from "next/image";
+import Link from "next/link";
 
-const Container = styled.div`
+const ModeList = styled.ul`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-bottom: 14px;
+  margin-top: 72px;
 `;
 
-const StyledPageTitle = styled.h2`
-  font-size: 2.1rem;
-  font-weight: 400;
-  margin-bottom: 54px;
-  margin-top: 6px;
+const ModeItem = styled.li`
+  width: 100%;
+  height: 300px;
+  max-width: 550px;
+  margin: 48px auto;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+  list-style: none;
+  box-shadow: ${({ theme }) => theme.boxShadowCollectionCard};
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: ${({ theme }) => theme.boxShadowCollectionCardHover};
+  }
 `;
 
 const StyledImage = styled(Image)`
