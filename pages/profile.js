@@ -147,7 +147,13 @@ export default function Profile({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={profileModalMode === "upload" ? "Upload Image" : "Delete Image"}
+        title={
+          profileModalMode === "upload"
+            ? "Upload Image"
+            : profileModalMode === "delete"
+            ? "Delete Image"
+            : "Delete Profile"
+        }
       >
         {profileModalMode === "upload" && (
           <ImageUpload
