@@ -3,11 +3,12 @@ import ThemeSwitch from "@/components/ThemeSwitch";
 import { useSession, signOut } from "next-auth/react";
 import ImageUpload from "@/components/ImageUpload";
 import ImageDelete from "@/components/ImageDelete";
-import Image from "next/image";
+import ProfileDelete from "@/components/ProfileDelete";
 import Modal from "@/components/Modal";
 import { useState } from "react";
 import useSWR from "swr";
 import CheckUserExistence from "@/utils/CheckUserExistence";
+import { useRouter } from "next/router.js";
 
 const Container = styled.div`
   display: flex;
@@ -57,6 +58,11 @@ const StyledButton = styled.button`
   }
 `;
 
+const ContainerProfileDelete = styled.div`
+  position: absolute;
+  bottom: 100px;
+`;
+
 const fetcher = (url) => fetch(url).then((response) => response.json());
 
 export default function Profile({
@@ -69,6 +75,7 @@ export default function Profile({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userImage, setUserImage] = useState("/asset/user.png");
   const [profileModalMode, setprofileModalMode] = useState("upload");
+  const router = useRouter();
 
   const {
     data: images,
@@ -85,7 +92,7 @@ export default function Profile({
 
   async function CheckUserImage(userId) {
     const userIsAvailable = await CheckUserExistence({ userId });
-    if (userIsAvailable.image) {
+    if (userIsAvailable && userIsAvailable.image) {
       setUserImage(userIsAvailable.image.url);
       return;
     } else {
@@ -99,7 +106,7 @@ export default function Profile({
     userName = session.user.name;
     CheckUserImage(userId);
   } else {
-    userId = 189611570;
+    userId = 189611571;
     userName = "Dominik Muster";
   }
 
@@ -170,6 +177,14 @@ export default function Profile({
             userImage={userImage}
           ></ImageDelete>
         )}
+        {profileModalMode === "erase" && (
+          <ProfileDelete
+            onClose={() => setIsModalOpen(false)}
+            userId={userId}
+            userImage={userImage}
+            signOut={signOut}
+          ></ProfileDelete>
+        )}
       </Modal>
       <article>
         <h4>statistics</h4>
@@ -187,6 +202,18 @@ export default function Profile({
           Sign out
         </StyledButton>
       </ButtonBar>
+      <ContainerProfileDelete>
+        <StyledButton
+          type="button"
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("erase");
+          }}
+          disabled={!session}
+        >
+          Profile delete
+        </StyledButton>
+      </ContainerProfileDelete>
     </Container>
   );
 }
