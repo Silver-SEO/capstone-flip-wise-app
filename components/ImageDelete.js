@@ -10,12 +10,7 @@ const StyledImageWrapper = styled.div`
   overflow: hidden;
 `;
 
-export default function ImageDelete({
-  onClose,
-  imagesMutate,
-  userId,
-  userImage,
-}) {
+export default function ImageDelete({ onClose, userId, userImage }) {
   async function handleSubmitDelete() {
     //delete user image in database
     const userData = await CheckUserExistence({ userId });
@@ -34,7 +29,6 @@ export default function ImageDelete({
         console.error("Failed to save user data");
         return null;
       }
-      imagesMutate();
       onClose();
       return response.json();
     } catch (error) {

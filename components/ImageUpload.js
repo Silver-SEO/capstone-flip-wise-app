@@ -81,7 +81,7 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
         console.error("Failed to save user data");
         return null;
       }
-      imagesMutate();
+
       setIsUploading(false);
       return response.json();
     } catch (error) {

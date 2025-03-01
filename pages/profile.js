@@ -6,9 +6,7 @@ import ImageDelete from "@/components/ImageDelete";
 import ProfileDelete from "@/components/ProfileDelete";
 import Modal from "@/components/Modal";
 import { useState } from "react";
-import useSWR from "swr";
 import CheckUserExistence from "@/utils/CheckUserExistence";
-import { useRouter } from "next/router.js";
 
 const Container = styled.div`
   display: flex;
@@ -63,29 +61,18 @@ const ContainerProfileDelete = styled.div`
   bottom: 100px;
 `;
 
-const fetcher = (url) => fetch(url).then((response) => response.json());
-
 export default function Profile({
   flashcards,
   collections,
   themeMode,
   onHandleToggleThemeMode,
+  userImage,
+  setUserImage,
 }) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userImage, setUserImage] = useState("/asset/user.png");
+
   const [profileModalMode, setprofileModalMode] = useState("upload");
-  const router = useRouter();
-
-  const {
-    data: images,
-    isLoading: imagesLoading,
-    error: imagesError,
-    mutate: imagesMutate,
-  } = useSWR("/api/images", fetcher);
-
-  if (imagesError) return <div>failed to load</div>;
-  if (imagesLoading) return <div>loading...</div>;
 
   let userId;
   let userName;
@@ -165,14 +152,12 @@ export default function Profile({
         {profileModalMode === "upload" && (
           <ImageUpload
             onClose={() => setIsModalOpen(false)}
-            imagesMutate={imagesMutate}
             userId={userId}
           ></ImageUpload>
         )}
         {profileModalMode === "delete" && (
           <ImageDelete
             onClose={() => setIsModalOpen(false)}
-            imagesMutate={imagesMutate}
             userId={userId}
             userImage={userImage}
           ></ImageDelete>

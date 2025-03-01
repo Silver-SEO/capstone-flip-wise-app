@@ -65,7 +65,11 @@ async function handlePickupUserThemeMode(data) {
   }
 }
 
-export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
+export default function Login({
+  CheckUserExistence,
+  handleToggleThemeMode,
+  userImage,
+}) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
@@ -104,7 +108,7 @@ export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
           <IconLogIn>
             {session.user.image ? (
               <img
-                src={session.user.image}
+                src={userImage}
                 alt="Profilbild"
                 width={40}
                 height={40}

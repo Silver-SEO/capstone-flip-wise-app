@@ -32,6 +32,7 @@ const fetcher = (url) => fetch(url).then((response) => response.json());
 
 export default function App({ Component, pageProps }) {
   const [themeMode, setThemeMode] = useState("dark");
+  const [userImage, setUserImage] = useState("/asset/user.png");
   const router = useRouter();
 
   const {
@@ -183,6 +184,8 @@ export default function App({ Component, pageProps }) {
               <Login
                 CheckUserExistence={CheckUserExistence}
                 handleToggleThemeMode={handleToggleThemeMode}
+                userImage={userImage}
+                setUserImage={setUserImage}
               />
             </StyledLogIn>
             <StyledTitle>Flipwise App</StyledTitle>
@@ -199,6 +202,8 @@ export default function App({ Component, pageProps }) {
               handleDeleteCollection={handleDeleteCollection}
               handleUpdateCollection={handleUpdateCollection}
               onHandleToggleThemeMode={handleToggleThemeMode}
+              userImage={userImage}
+              setUserImage={setUserImage}
             />
           </main>
 
