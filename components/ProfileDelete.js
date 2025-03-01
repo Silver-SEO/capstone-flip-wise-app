@@ -12,9 +12,7 @@ const StyledImageWrapper = styled.div`
 export default function ProfileDelete({ onClose, userId, userImage, signOut }) {
   async function handleDeleteProfile(userId) {
     const userData = await CheckUserExistence({ userId });
-    console.log("userId_", userId);
     const user_id = userData._id;
-    console.log("user_id_", user_id);
     const response = await fetch(`/api/users/${user_id}`, {
       method: "DELETE",
     });
