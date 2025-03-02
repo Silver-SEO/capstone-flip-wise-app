@@ -18,13 +18,13 @@ export const StyledButton = styled.button`
 `;
 
 export default function Button({
-  onClick,
-  buttonLabel,
   type,
+  onClick,
   fontSize,
   padding,
   margin,
   disabled,
+  buttonLabel,
 }) {
   return (
     <StyledButton

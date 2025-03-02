@@ -1,6 +1,12 @@
 import styled from "styled-components";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import { useSession, signOut } from "next-auth/react";
+import ImageUpload from "@/components/ImageUpload";
+import ImageDelete from "@/components/ImageDelete";
+import ProfileDelete from "@/components/ProfileDelete";
+import Modal from "@/components/Modal";
+import { useState } from "react";
+import CheckUserExistence from "@/utils/CheckUserExistence";
 
 const Container = styled.div`
   display: flex;
@@ -50,29 +56,50 @@ const StyledButton = styled.button`
   }
 `;
 
+const ContainerProfileDelete = styled.div`
+  position: absolute;
+  bottom: 100px;
+`;
+
 export default function Profile({
   flashcards,
   collections,
   themeMode,
   onHandleToggleThemeMode,
+  userImage,
+  setUserImage,
 }) {
   const { data: session } = useSession();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [profileModalMode, setprofileModalMode] = useState("upload");
+
   let userId;
   let userName;
-  let userImage;
+
+  async function CheckUserImage(userId) {
+    const userIsAvailable = await CheckUserExistence({ userId });
+    if (userIsAvailable && userIsAvailable.image) {
+      setUserImage(userIsAvailable.image.url);
+      return;
+    } else {
+      setUserImage(session.user.image);
+      return;
+    }
+  }
+
   if (session) {
     userId = session.user.id;
     userName = session.user.name;
-    userImage = session.user.image;
+    CheckUserImage(userId);
   } else {
-    userId = 189611569;
+    userId = 189611571;
     userName = "Dominik Muster";
-    userImage = "/asset/user.png";
   }
+
   const myCollections = collections.filter(
     (collection) => collection.owner === userId
   ).length;
-
   const myFlashcards = flashcards.filter(
     (flashcard) => flashcard.owner === userId
   ).length;
@@ -83,9 +110,9 @@ export default function Profile({
   return (
     <Container>
       <StyledPageTitle>my profile</StyledPageTitle>
-      {session && session.user.image && (
+      {session && (
         <img
-          src={session.user.image}
+          src={userImage}
           alt="profile-image"
           width={100}
           height={100}
@@ -97,6 +124,59 @@ export default function Profile({
           <img src={userImage} alt="login-image" width={100} height={100} />
         </IconLogOut>
       )}
+      <ButtonBar>
+        <StyledButton
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("delete");
+          }}
+          disabled={!session || userImage === session.user.image}
+        >
+          image delete
+        </StyledButton>
+        <StyledButton
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("upload");
+          }}
+          disabled={!session}
+        >
+          image upload
+        </StyledButton>
+      </ButtonBar>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={
+          profileModalMode === "upload"
+            ? "Upload Image"
+            : profileModalMode === "delete"
+            ? "Delete Image"
+            : "Delete Profile"
+        }
+      >
+        {profileModalMode === "upload" && (
+          <ImageUpload
+            onClose={() => setIsModalOpen(false)}
+            userId={userId}
+          ></ImageUpload>
+        )}
+        {profileModalMode === "delete" && (
+          <ImageDelete
+            onClose={() => setIsModalOpen(false)}
+            userId={userId}
+            userImage={userImage}
+          ></ImageDelete>
+        )}
+        {profileModalMode === "erase" && (
+          <ProfileDelete
+            onClose={() => setIsModalOpen(false)}
+            userId={userId}
+            userImage={userImage}
+            signOut={signOut}
+          ></ProfileDelete>
+        )}
+      </Modal>
       <article>
         <h4>statistics</h4>
         <p>Name: {userName}</p>
@@ -113,6 +193,18 @@ export default function Profile({
           Sign out
         </StyledButton>
       </ButtonBar>
+      <ContainerProfileDelete>
+        <StyledButton
+          type="button"
+          onClick={() => {
+            setIsModalOpen(true);
+            setprofileModalMode("erase");
+          }}
+          disabled={!session}
+        >
+          Profile delete
+        </StyledButton>
+      </ContainerProfileDelete>
     </Container>
   );
 }

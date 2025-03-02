@@ -21,6 +21,14 @@ export default async function handler(request, response) {
           .status(200)
           .json({ status: "User successfully updated." });
       }
+
+      case "DELETE": {
+        await User.findByIdAndDelete(id);
+        return response
+          .status(200)
+          .json({ status: "User successfully deleted." });
+      }
+
       default:
         return response.status(405).json({ status: "Method not allowed." });
     }

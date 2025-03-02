@@ -1,24 +1,20 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect } from "react";
 import styled from "styled-components";
-import Link from "next/link";
 import Modal from "./Modal";
 import { useState } from "react";
+import Link from "next/link";
 
 const IconLogIn = styled.span`
   color: ${({ theme }) => theme.cardPrimary};
   border: 1px solid ${({ theme }) => theme.text};
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
 `;
 
 const IconLogOut = styled.span`
   color: ${({ theme }) => theme.cardPrimary};
   border: 1px solid ${({ theme }) => theme.text};
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
   & img {
     filter: ${({ theme }) =>
       theme.navbarText === "#a3a8c8"
@@ -69,7 +65,11 @@ async function handlePickupUserThemeMode(data) {
   }
 }
 
-export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
+export default function Login({
+  CheckUserExistence,
+  handleToggleThemeMode,
+  userImage,
+}) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
           <IconLogIn>
             {session.user.image ? (
               <img
-                src={session.user.image}
+                src={userImage}
                 alt="Profilbild"
                 width={40}
                 height={40}
@@ -124,19 +124,22 @@ export default function Login({ CheckUserExistence, handleToggleThemeMode }) {
             )}
           </IconLogIn>
         </Link>
-        <StyledButton onClick={() => signOut()}>Sign out</StyledButton>
+        <StyledButton onClick={() => handleSignOut()}>Sign out</StyledButton>
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="You are now logged out."
+        ></Modal>
       </>
     );
   }
 
   return (
-    <>
-      <Link href={`/profile`}>
-        <IconLogOut>
-          <img src="/asset/user.png" alt="login/image" width={40} height={40} />
-        </IconLogOut>
-        <StyledButton onClick={() => signIn()}>Sign in</StyledButton>
-      </Link>
-    </>
+    <Link href={`/profile`}>
+      <IconLogOut>
+        <img src="/asset/user.png" alt="login/image" width={40} height={40} />
+      </IconLogOut>
+      <StyledButton onClick={() => signIn()}>Sign in</StyledButton>
+    </Link>
   );
 }
