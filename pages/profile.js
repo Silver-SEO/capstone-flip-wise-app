@@ -71,7 +71,6 @@ export default function Profile({
 }) {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [profileModalMode, setprofileModalMode] = useState("upload");
 
   let userId;
