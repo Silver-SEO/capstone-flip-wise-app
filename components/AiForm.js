@@ -185,7 +185,7 @@ export default function AiForm({
         collectionId: showCollectionInput ? null : data.collectionId,
       };
 
-      const response = await fetch("/api/generate", {
+      const response = await fetch("/api/generate/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
