@@ -44,7 +44,7 @@ const StyledImageWrapper = styled.div`
   overflow: hidden;
 `;
 
-export default function ImageUpload({ onClose, imagesMutate, userId }) {
+export default function ImageUpload({ onClose, userId }) {
   const [uploadMode, setUploadMode] = useState("upload");
   const [image, setImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -55,7 +55,7 @@ export default function ImageUpload({ onClose, imagesMutate, userId }) {
     //upload user image to cloudinary
     setIsUploading(true);
     const data = Object.fromEntries(formData);
-    const uploadResponse = await fetch("/api/upload", {
+    const uploadResponse = await fetch("/api/upload/cloudinary", {
       method: "POST",
       body: formData,
     });
