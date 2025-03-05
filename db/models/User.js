@@ -5,9 +5,12 @@ const userSchema = new Schema({
   userId: { type: String, required: true },
   themeMode: { type: String, default: "dark", required: true },
   image: {
-    height: { type: String, default: null, required: true },
-    width: { type: String, default: null, required: true },
-    url: { type: String, default: null, required: true },
+    type: {
+      height: { type: String },
+      width: { type: String },
+      url: { type: String },
+    },
+    default: null,
   },
 });
 
